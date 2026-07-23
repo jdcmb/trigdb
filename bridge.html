@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase Bridge</title>
+</head>
+<body>
+<script>
+    // Listen for messages coming from your Neocities site
+    window.addEventListener('message', async (event) => {
+        const { id, url, method, body } = event.data || {};
+        if (!id || !url) return;
+
+        try {
+            const response = await fetch(url, {
+                method: method || 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : undefined
+            });
+
+            const data = await response.json();
+            // Send the response back to Neocities
+            event.source.postMessage({ id, success: response.ok, data, status: response.status }, event.origin);
+        } catch (err) {
+            event.source.postMessage({ id, success: false, error: err.message }, event.origin);
+        }
+    });
+</script>
+</body>
+</html>
